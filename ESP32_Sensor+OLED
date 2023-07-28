@@ -157,17 +157,31 @@ Adafruit_SSD1306 oled(128,64,&Wire,-1);
 const int gasPin=A3;
 const int RED_LED=16;
 const int GREEN_LED=17;
+const int speakerPin=18;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   pinMode(RED_LED,OUTPUT);
   pinMode(GREEN_LED,OUTPUT);
+  pinMode(speakerPin, OUTPUT);
 
   if(!oled.begin(SSD1306_SWITCHCAPVCC,0x3C)){
     Serial.println(F("SSD1306 allocation failed"));
     while (true);
   }
   
+}
+
+//given code for playing speaker
+void play(int note, int dur)
+{
+  tone(speakerPin, note);
+  analogWrite(LEDPin, 255);
+  delay(dur*NOTE_DUR);
+  analogWrite(LEDPin, 0);
+  noTone(speakerPin); 
+  delay(dur*NOTE_DUR/3);
 }
 
 void loop() {
@@ -185,6 +199,7 @@ void loop() {
     Serial.println(gasLevel);
     digitalWrite(RED_LED,HIGH);
     digitalWrite(GREEN_LED,LOW);
+    play(3000, 3);
   }
   else{
     oled.drawBitmap(0,0,myBitmapSafe,128,64,WHITE);
