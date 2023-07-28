@@ -1,1 +1,42 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
+//#define SCREEN_WIDTH 128
+//#define SCREEN_WIDTH 64
+
+Adafruit_SSD1306 oled(128,64,&Wire,-1);
+
+const int gasPin=A3;
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+
+  if(!oled.begin(SSD1306_SWITCHCAPVCC,0x3C)){
+    Serial.println(F("SSD1306 allocation failed"));
+    while (true);
+  }
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  oled.clearDisplay();
+  oled.display();
+  oled.setTextSize(2);
+  oled.setTextColor(WHITE);
+  oled.setCursor(0,0);
+  int gasLevel=analogRead(gasPin);
+
+  if(gasLevel>=700){
+    oled.println("Danger");
+    oled.display();
+    Serial.println(gasLevel);
+  }
+  else{
+    oled.println("Safe");
+    oled.display();
+    Serial.println(gasLevel);
+  }
+  delay(500);
+}
