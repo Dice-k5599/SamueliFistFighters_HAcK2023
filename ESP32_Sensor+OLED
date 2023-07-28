@@ -22,7 +22,6 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   oled.clearDisplay();
-  oled.display();
   oled.setTextSize(2);
   oled.setTextColor(WHITE);
   oled.setCursor(0,0);
