@@ -155,9 +155,13 @@ const unsigned char* myBitmapallArray[1] = {
 Adafruit_SSD1306 oled(128,64,&Wire,-1);
 
 const int gasPin=A3;
+const int RED_LED=16;
+const int GREEN_LED=17;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  pinMode(RED_LED,OUTPUT);
+  pinMode(GREEN_LED,OUTPUT);
 
   if(!oled.begin(SSD1306_SWITCHCAPVCC,0x3C)){
     Serial.println(F("SSD1306 allocation failed"));
@@ -175,15 +179,19 @@ void loop() {
   oled.setCursor(0,0);
   int gasLevel=analogRead(gasPin);
 
-  if(gasLevel>=2000){
+  if(gasLevel>=850){
     oled.drawBitmap(0,0,epd_bitmap_Danger_Sign,128,64,WHITE);
     oled.display();
     Serial.println(gasLevel);
+    digitalWrite(RED_LED,HIGH);
+    digitalWrite(GREEN_LED,LOW);
   }
   else{
     oled.drawBitmap(0,0,myBitmapSafe,128,64,WHITE);
     oled.display();
     Serial.println(gasLevel);
+    digitalWrite(GREEN_LED,HIGH);
+    digitalWrite(RED_LED,LOW);
   }
   delay(500);
 }
