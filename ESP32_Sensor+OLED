@@ -3,7 +3,7 @@
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_NeoPixel.h>
 #include "HackPublisher.h"
-
+#include "AM232X.h" 
 
 
 
@@ -177,15 +177,16 @@ Adafruit_NeoPixel ring(LED_COUNT,LED_PIN,NEO_RGBW+NEO_KHZ800);
 
 HackPublisher publisher("Samueli Fist Fighters",true);
 
-
+AM232X AM2320;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   pinMode(RED_LED,OUTPUT);
   pinMode(GREEN_LED,OUTPUT);
+  pinMode(gasPin, INPUT);
   pinMode(speakerPin, OUTPUT);
-  pinMode(BUTTON_PIN,INPUT);
+  pinMode(BUTTON_PIN,INPUT_PULLUP);
   pinMode(13,INPUT_PULLUP);
   
   while(!Serial)continue;
@@ -206,7 +207,22 @@ void setup() {
   ring.show();
   ring.setBrightness(100);
   delay(10000);
- 
+
+  // Humidity Sensor
+  Serial.println(__FILE__);
+  Serial.print("LIBRARY VERSION: ");
+  Serial.println(AM232X_LIB_VERSION);
+  Serial.println();
+
+  if (! AM2320.begin() )
+  {
+    Serial.println("Sensor not found");
+    while (1);
+  }
+  AM2320.wakeUp();
+  delay(2000);
+
+  Serial.println("Type,\tStatus,\tHumidity (%),\tTemperature (C)");
 }
 
 //given code for playing speaker
@@ -221,46 +237,68 @@ void play(int note, int dur)
 void loop() {
   // put your main code here, to run repeatedly:
   int gasLevel=analogRead(gasPin);
-
-
+  Serial.println(gasLevel);
 
   oled.clearDisplay();
 
   oled.setTextSize(1);
   oled.setTextColor(WHITE,BLACK);
   oled.setCursor(0,0);
-  int buttonState=digitalRead(13);
 
   oled.print("Gas Level ");
   oled.println(gasLevel);
+
+  // READ DATA (Temperature/Humidity)
+  int status = AM2320.read();
+  float temperature = AM2320.getTemperature();
+  float humidity = AM2320.getHumidity();
   
+  switch (status)
+  {
+    case AM232X_OK:
+      Serial.print("OK,\t");
+      break;
+    default:
+      Serial.print(status);
+      Serial.print("\t");
+      break;
+  }
+  // DISPLAY DATA (Temperature, Humidity), sensor only returns one decimal.
+  Serial.print("Temperature ");
+  Serial.print(temperature);
+  Serial.println(" C");
+  Serial.print("Humidity: ");
+  Serial.println(humidity);
+
+  oled.print("Temperature: ");
+  oled.println(temperature);
+  oled.print("Humidity: ");
+  oled.println(humidity);
+
   //Serial.println(prevState);
   if(gasLevel>=gasThreshold){
-    //oled.drawBitmap(0,0,epd_bitmap_Danger_Sign,128,64,WHITE);
-    oled.println("Warning:Hazardous Gas");
+    oled.drawBitmap(0,0,epd_bitmap_Danger_Sign,128,64,WHITE);
     oled.display();
-    digitalWrite(RED_LED,HIGH);
-    digitalWrite(GREEN_LED,LOW);
-    
     play(3000, 3);
+    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(RED_LED, HIGH);
   }
   else{
-    //oled.drawBitmap(0,0,myBitmapSafe,128,64,WHITE);
-    oled.println("Area Safe");
-    oled.display();
-    digitalWrite(GREEN_LED,HIGH);
-    digitalWrite(RED_LED,LOW);
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(GREEN_LED, HIGH);
   }
+
+  int buttonState=digitalRead(BUTTON_PIN);
   if (buttonState == LOW) {
     if(!prevState){
-       for(uint8_t i=1;i<LED_COUNT;i++){
+       for(uint8_t i=0;i<LED_COUNT;i++){
      ring.setPixelColor(i,ring.Color(255,255,100));}
      //ring.fill(ring.Color(255,255,255),0,12);
     ring.show();
     prevState=true;
     }
     else{
-      for(int i=1;i< LED_COUNT;i++){
+      for(int i=0;i< LED_COUNT;i++){
       ring.setPixelColor(i,ring.Color(0,0,0));
       }
       ring.show();
@@ -285,5 +323,5 @@ void loop() {
   }
   publisher.send();
   
-  delay(10);
+  delay(100);
 }
