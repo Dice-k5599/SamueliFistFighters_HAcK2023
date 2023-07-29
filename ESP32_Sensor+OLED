@@ -1,6 +1,8 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_NeoPixel.h>
+
 
 //#define SCREEN_WIDTH 128
 //#define SCREEN_WIDTH 64
@@ -158,6 +160,13 @@ const int gasPin=A3;
 const int RED_LED=16;
 const int GREEN_LED=17;
 const int speakerPin=18;
+const int BUTTON_PIN=21;
+const int LED_COUNT=12;
+const int LED_PIN=15;
+const int NOTE_DUR=60;
+bool prevState=false;
+
+Adafruit_NeoPixel ring(LED_COUNT,LED_PIN,NEO_RGBW+NEO_KHZ800);
 
 void setup() {
   // put your setup code here, to run once:
@@ -165,11 +174,17 @@ void setup() {
   pinMode(RED_LED,OUTPUT);
   pinMode(GREEN_LED,OUTPUT);
   pinMode(speakerPin, OUTPUT);
+  pinMode(BUTTON_PIN,INPUT);
+  pinMode(13,INPUT_PULLUP);
+
 
   if(!oled.begin(SSD1306_SWITCHCAPVCC,0x3C)){
     Serial.println(F("SSD1306 allocation failed"));
     while (true);
   }
+  ring.begin();
+  ring.show();
+  ring.setBrightness(100);
   
 }
 
@@ -177,9 +192,7 @@ void setup() {
 void play(int note, int dur)
 {
   tone(speakerPin, note);
-  analogWrite(LEDPin, 255);
   delay(dur*NOTE_DUR);
-  analogWrite(LEDPin, 0);
   noTone(speakerPin); 
   delay(dur*NOTE_DUR/3);
 }
@@ -191,22 +204,50 @@ void loop() {
   oled.setTextSize(2);
   oled.setTextColor(WHITE);
   oled.setCursor(0,0);
-  int gasLevel=analogRead(gasPin);
-
+ // int gasLevel=analogRead(gasPin);
+  int  gasLevel=1000;
+  int buttonState=digitalRead(13);
+  
+  Serial.println(prevState);
   if(gasLevel>=850){
     oled.drawBitmap(0,0,epd_bitmap_Danger_Sign,128,64,WHITE);
     oled.display();
     Serial.println(gasLevel);
-    digitalWrite(RED_LED,HIGH);
-    digitalWrite(GREEN_LED,LOW);
+    ring.setPixelColor(0,ring.Color(0,255,0));
+    ring.show();
     play(3000, 3);
   }
   else{
     oled.drawBitmap(0,0,myBitmapSafe,128,64,WHITE);
     oled.display();
     Serial.println(gasLevel);
-    digitalWrite(GREEN_LED,HIGH);
-    digitalWrite(RED_LED,LOW);
+    ring.setPixelColor(0,ring.Color(255,0,0));
+    ring.show();
   }
-  delay(500);
+  if (buttonState == LOW) {
+    if(!prevState){
+       for(int i=1;i<LED_COUNT;i++){
+      ring.setPixelColor(i,ring.Color(255,255,100));}
+
+    ring.show();
+    prevState=true;
+    }
+    else{
+      for(int i=1;i< LED_COUNT;i++){
+      ring.setPixelColor(i,ring.Color(0,0,0));
+      }
+      ring.show();
+      prevState=false;
+     }
+  }
+   
+ // else if(buttonState==HIGH);{
+//    for(int i=0;i< LED_COUNT;i++){
+//      ring.setPixelColor(i,0,0,0);
+//    }
+//    ring.show();
+//     delay(50);
+ // }
+  
+  delay(10);
 }
