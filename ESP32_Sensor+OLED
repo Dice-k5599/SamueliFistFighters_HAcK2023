@@ -2,6 +2,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_NeoPixel.h>
+#include "HackPublisher.h"
+
 
 
 //#define SCREEN_WIDTH 128
@@ -155,8 +157,13 @@ const unsigned char* myBitmapallArray[1] = {
 };
 
 Adafruit_SSD1306 oled(128,64,&Wire,-1);
+const char *ssid="ASUS-F8";
+const char *password="K33pi7$@f3%";
+const int channel = 0;
+const int frequency= 5000;
+const int resolution=10;
 
-const int gasPin=A3;
+const int gasPin=A5;
 const int RED_LED=16;
 const int GREEN_LED=17;
 const int speakerPin=18;
@@ -168,6 +175,10 @@ bool prevState=false;
 
 Adafruit_NeoPixel ring(LED_COUNT,LED_PIN,NEO_RGBW+NEO_KHZ800);
 
+HackPublisher publisher("Samueli Fist Fighters");
+
+
+WiFiServer server(80);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -176,7 +187,15 @@ void setup() {
   pinMode(speakerPin, OUTPUT);
   pinMode(BUTTON_PIN,INPUT);
   pinMode(13,INPUT_PULLUP);
-
+  while(!Serial)continue;
+  WiFi.begin(ssid,password);
+  while(WiFi.status()!=WL_CONNECTED){
+    delay(500);
+    Serial.print("Local IP Address ");
+    Serial.println(WiFi.localIP());
+  }
+  ledcSetup(channel,frequency,resolution);
+  ledcAttachPin(gasPin,channel);
 
   if(!oled.begin(SSD1306_SWITCHCAPVCC,0x3C)){
     Serial.println(F("SSD1306 allocation failed"));
@@ -185,7 +204,10 @@ void setup() {
   ring.begin();
   ring.show();
   ring.setBrightness(100);
-  
+  publisher.begin();
+  server.begin();
+  delay(10000);
+ 
 }
 
 //given code for playing speaker
@@ -199,6 +221,16 @@ void play(int note, int dur)
 
 void loop() {
   // put your main code here, to run repeatedly:
+  for(int duty=0; duty<=1023;duty++){
+    ledcWrite(channel,duty);
+    delay(15);
+  }
+  for(int duty=1023; duty >=0;duty--){
+    ledcWrite(channel,duty);
+    delay(15);
+  }
+
+  
   oled.clearDisplay();
 
   oled.setTextSize(2);
@@ -208,11 +240,11 @@ void loop() {
   int  gasLevel=1000;
   int buttonState=digitalRead(13);
   
-  Serial.println(prevState);
+  //Serial.println(prevState);
   if(gasLevel>=850){
     oled.drawBitmap(0,0,epd_bitmap_Danger_Sign,128,64,WHITE);
     oled.display();
-    Serial.println(gasLevel);
+    //Serial.println(gasLevel);
     ring.setPixelColor(0,ring.Color(0,255,0));
     ring.show();
     play(3000, 3);
@@ -220,15 +252,15 @@ void loop() {
   else{
     oled.drawBitmap(0,0,myBitmapSafe,128,64,WHITE);
     oled.display();
-    Serial.println(gasLevel);
+    //Serial.println(gasLevel);
     ring.setPixelColor(0,ring.Color(255,0,0));
     ring.show();
   }
   if (buttonState == LOW) {
     if(!prevState){
-       for(int i=1;i<LED_COUNT;i++){
-      ring.setPixelColor(i,ring.Color(255,255,100));}
-
+       for(uint8_t i=1;i<LED_COUNT;i++){
+     ring.setPixelColor(i,ring.Color(255,255,100));}
+     //ring.fill(ring.Color(255,255,255),0,12);
     ring.show();
     prevState=true;
     }
@@ -248,6 +280,8 @@ void loop() {
 //    ring.show();
 //     delay(50);
  // }
+  publisher.store("Gas Reading",gasLevel);
+  publisher.send();
   
   delay(10);
 }
