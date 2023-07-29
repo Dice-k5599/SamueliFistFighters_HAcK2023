@@ -252,6 +252,8 @@ void loop() {
     ring.setPixelColor(0,ring.Color(0,255,0));
     ring.show();
     play(3000, 3);
+    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(RED_LED, HIGH);
   }
   else{
     oled.drawBitmap(0,0,myBitmapSafe,128,64,WHITE);
@@ -259,6 +261,8 @@ void loop() {
     //Serial.println(gasLevel);
     ring.setPixelColor(0,ring.Color(255,0,0));
     ring.show();
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(GREEN_LED, HIGH);
   }
   if (buttonState == LOW) {
     if(!prevState){
