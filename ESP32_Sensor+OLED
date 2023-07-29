@@ -221,6 +221,41 @@ void play(int note, int dur)
 
 void loop() {
   // put your main code here, to run repeatedly:
+  int gasLevel=analogRead(gasPin);
+  WiFiClient client = server.available();
+  if(client){
+    Serial.println("New Client");
+    String currentLine=" ";
+
+    while(client.connected()){
+      if(client.available()){
+        char c=client.read();
+        Serial.write(c);
+        if(c=='\n'){
+
+           if(currentLine.length()==0){
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-type:text/html");
+            client.println();
+            
+            client.print("Gas Reading: ");
+            client.print(gasLevel);
+            client.print("<br>");
+            client.println();
+            break;
+           }
+           else{
+            currentLine="";
+           }
+        }
+        else if(c!='\r'){
+          currentLine +=c;
+        }
+      }
+    }
+    client.stop();
+    Serial.println("Client Disconnected.");
+  }
   for(int duty=0; duty<=1023;duty++){
     ledcWrite(channel,duty);
     delay(15);
@@ -236,8 +271,6 @@ void loop() {
   oled.setTextSize(2);
   oled.setTextColor(WHITE);
   oled.setCursor(0,0);
- // int gasLevel=analogRead(gasPin);
-  int  gasLevel=1000;
   int buttonState=digitalRead(13);
   
   //Serial.println(prevState);
@@ -271,6 +304,7 @@ void loop() {
       ring.show();
       prevState=false;
      }
+     
   }
    
  // else if(buttonState==HIGH);{
