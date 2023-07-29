@@ -6,6 +6,7 @@
 
 
 
+
 //#define SCREEN_WIDTH 128
 //#define SCREEN_WIDTH 64
 // 'Danger-Sign', 128x64px
@@ -159,11 +160,12 @@ const unsigned char* myBitmapallArray[1] = {
 Adafruit_SSD1306 oled(128,64,&Wire,-1);
 const char *ssid="ASUS-F8";
 const char *password="K33pi7$@f3%";
-const int channel = 0;
-const int frequency= 5000;
-const int resolution=10;
+//const int channel = 0;
+//const int frequency= 5000;
+//const int resolution=10;
 
-const int gasPin=A5;
+const int gasPin=A3;
+const int gasThreshold=850;
 const int RED_LED=16;
 const int GREEN_LED=17;
 const int speakerPin=18;
@@ -173,12 +175,13 @@ const int LED_PIN=15;
 const int NOTE_DUR=60;
 bool prevState=false;
 
+
 Adafruit_NeoPixel ring(LED_COUNT,LED_PIN,NEO_RGBW+NEO_KHZ800);
 
-HackPublisher publisher("Samueli Fist Fighters");
+HackPublisher publisher("Samueli Fist Fighters",true);
 
 
-WiFiServer server(80);
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -187,15 +190,18 @@ void setup() {
   pinMode(speakerPin, OUTPUT);
   pinMode(BUTTON_PIN,INPUT);
   pinMode(13,INPUT_PULLUP);
+  
   while(!Serial)continue;
+  
   WiFi.begin(ssid,password);
   while(WiFi.status()!=WL_CONNECTED){
     delay(500);
     Serial.print("Local IP Address ");
     Serial.println(WiFi.localIP());
   }
-  ledcSetup(channel,frequency,resolution);
-  ledcAttachPin(gasPin,channel);
+  publisher.begin();
+//  ledcSetup(channel,frequency,resolution);
+//  ledcAttachPin(gasPin,channel);
 
   if(!oled.begin(SSD1306_SWITCHCAPVCC,0x3C)){
     Serial.println(F("SSD1306 allocation failed"));
@@ -204,8 +210,6 @@ void setup() {
   ring.begin();
   ring.show();
   ring.setBrightness(100);
-  publisher.begin();
-  server.begin();
   delay(10000);
  
 }
@@ -222,50 +226,17 @@ void play(int note, int dur)
 void loop() {
   // put your main code here, to run repeatedly:
   int gasLevel=analogRead(gasPin);
-  WiFiClient client = server.available();
-  if(client){
-    Serial.println("New Client");
-    String currentLine=" ";
 
-    while(client.connected()){
-      if(client.available()){
-        char c=client.read();
-        Serial.write(c);
-        if(c=='\n'){
 
-           if(currentLine.length()==0){
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println();
-            
-            client.print("Gas Reading: ");
-            client.print(gasLevel);
-            client.print("<br>");
-            client.println();
-            break;
-           }
-           else{
-            currentLine="";
-           }
-        }
-        else if(c!='\r'){
-          currentLine +=c;
-        }
-      }
-    }
-    client.stop();
-    Serial.println("Client Disconnected.");
-  }
-  for(int duty=0; duty<=1023;duty++){
-    ledcWrite(channel,duty);
-    delay(15);
-  }
-  for(int duty=1023; duty >=0;duty--){
-    ledcWrite(channel,duty);
-    delay(15);
-  }
+//  for(int duty=0; duty<=1023;duty++){
+//    ledcWrite(channel,duty);
+//    delay(15);
+//  }
+//  for(int duty=1023; duty >=0;duty--){
+//    ledcWrite(channel,duty);
+//    delay(15);
+//  }
 
-  
   oled.clearDisplay();
 
   oled.setTextSize(2);
@@ -274,7 +245,7 @@ void loop() {
   int buttonState=digitalRead(13);
   
   //Serial.println(prevState);
-  if(gasLevel>=850){
+  if(gasLevel>=gasThreshold){
     oled.drawBitmap(0,0,epd_bitmap_Danger_Sign,128,64,WHITE);
     oled.display();
     //Serial.println(gasLevel);
@@ -314,8 +285,15 @@ void loop() {
 //    ring.show();
 //     delay(50);
  // }
-  publisher.store("Gas Reading",gasLevel);
+  publisher.store("Gas_Level",gasLevel);
+  Serial.println(gasLevel);
+  if(gasLevel>=gasThreshold){
+    publisher.store("Danger_Level", "Warning:_Hazardous_Gas_Detected");
+  }
+  else{
+    publisher.store("Danger_Level", "Area_Safe");
+  }
   publisher.send();
   
-  delay(10);
+  delay(500);
 }
