@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>replit</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body style="font-size: 26px;">
+  
+  <script src="script.js"></script>
+  <!--change team neam here and in publisher Declaration on arduino-->
+  <script> team_name="Samueli Fist Fighters"</script>
+  <script type="module" src="communication.js"></script>
+  <h1><center>Sensor Values</center></h1>
+  <center style="display:inline">Gas Level
+  <p style="display:inline" id="Gas_Level"></p></center>
+  <center><p id="Danger_Level"></p></center>
+  Temperature
+  <center><p id=Temperature"></p></center>
+  Humidity
+  <center><p id="Humidity"></p></center>
+
+  <center><img id="myImage" src="Goku_ThumbsUp.jpeg" width="330" height="330">
+  </center>
+
+<script>
+  //document.getElementById("Gas_Level").innerHTML = "hi";
+  // console.log("hi");
+function changeImage() {
+   var level = document.getElementById("Gas_Level").innerText;
+   var image=document.getElementById("myImage");
+   console.log(level);
+  if (parseInt(level)>=925) {
+   
+   image.src = "Enel_Face.jpeg";
+   } else {
+    
+    image.src = "Goku_ThumbsUp.jpeg";
+  }
+ }
+ setInterval(changeImage, 10);
+
+</script>
+ 
+  <!--
+  This script places a badge on your repl's full-browser view back to your repl's cover
+  page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,
+  teal, blue, blurple, magenta, pink!
+  -->
+  <script src="192.168.50.200" theme="dark" position="bottom-right"></script>
+</body>
+
+</html>
