@@ -38,6 +38,10 @@ const int LED_COUNT=12;
 //Pin connected to Neopixel IN Port
 const int LED_PIN=15;
 //Booleans for gas, temperature and humidity safety
+// Hypersonic sensor trigger pin
+const int trigPin = 27;
+// Hypersonic sensor echo pin
+const int echoPin = 33;
 bool gasSafe=false;
 bool tempSafe=false;
 bool humiditySafe=false;
@@ -58,6 +62,8 @@ void setup() {
   pinMode(gasPin, INPUT);
   pinMode(speakerPin, OUTPUT);
   pinMode(BUTTON_PIN,INPUT_PULLUP);
+  pinMode(trigPin, OUTPUT); 
+  pinMode(echoPin, INPUT); 
   pinMode(13,INPUT_PULLUP);
   
   while(!Serial)continue;
@@ -123,6 +129,24 @@ void loop() {
   //Display gas data to OLED
   oled.print("Gas Level ");
   oled.println(gasLevel);
+
+  // READ DATA (Distance)
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  long duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  double distance = (0.034 * duration) / 2;
+  
+  // DISPLAY DATA (Distance) on OLEDl
+  oled.print("Distance: ");
+  oled.print(distance);
+  oled.println(" cm");
 
   // READ DATA (Temperature/Humidity)
   int status = AM2320.read();
