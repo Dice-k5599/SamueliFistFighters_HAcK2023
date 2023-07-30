@@ -7,7 +7,7 @@
 
 
 
-
+//Samueli Fist Fighters
 
 //Declaration of OLED
 Adafruit_SSD1306 oled(128,64,&Wire,-1);
