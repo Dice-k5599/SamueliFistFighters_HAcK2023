@@ -4,22 +4,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>replit</title>
+  <title>Samueli Fist Fighters: Sensor Data</title>
   <link href="style.css" rel="stylesheet" type="text/css" />
   <style>
     .card{
       box-shadow:0 4px 8px 0 rgba(0,0,0,0.2);
       transition:0.3s;
-      width: 29%;
+      width: 46%;
       float: left;
       margin-left:2%;
       margin-right:2%;
+      margin-top: 2%;
+      margin-bottom:2%;
       }
       .card:hover{
         box-shadow:0 8px 16px 0 rgba(0,0,0,0.2);
       }
       .container{
         padding: 2px 16px;
+      }
+      .header{
+        background-color:cadetblue;
+        font-size: 32px;
+        color:black;
+        font-family:'Times New Roman';
+      }
+      .centering{
+        margin-left:auto;
+        margin-right:auto;
       }
   </style>
 </head>
@@ -30,7 +42,8 @@
   <!--change team neam here and in publisher Declaration on arduino-->
   <script> team_name="Samueli Fist Fighters"</script>
   <script type="module" src="communication.js"></script>
-  <h1><center>Sensor Values</center></h1>
+  <div class="header"><h1><center>Samueli Fist Fighters</center></h1><h2><center>Sensor Values</center></h2></div>
+
   <div class="card">
     <img src="Clown_3_634x450.jpeg"alt="Clown" style="width:100%">
     <div class="container">
@@ -58,15 +71,26 @@
       <p style="display:inline" id="Humidity"></p></center>
     </div>
   </div>
+  <div class="card">
+    <img src="gotenks.webp" alt="Buu"style="width:100%">
+    <div class="container">
+      <center style="display:inline">Distance from Ultrasonic: 
+      <p style="display:inline" id="Distance"></p></center>
+    </div>
+  </div>
   <!--<center style="display:inline">Humidity: 
   <p style="display:inline" id="Humidity"></p></center>-->
   <br>
-  <p id="Danger_Level"></p>
+  <!--<p id="Danger_Level"></p>-->
   <br>
   <p style="color:white" id="Gas_Limit"></p>
-
-  <center><img id="myImage" src="Goku_ThumbsUp.jpeg" width="700" height="450">
-  </center>
+  <div class="centring">
+    <div class="card"><center>
+      <img id="myImage" src="Goku_ThumbsUp.jpeg" width="700" height="450"></center>
+      <div class="contianer"><center><p id="Danger_Level"></p></center>
+      </div>
+    </div>    
+  </div>
 
 <script>
   //document.getElementById("Gas_Level").innerHTML = "hi";
@@ -78,7 +102,7 @@ function changeImage() {
    var image=document.getElementById("myImage");
    var gasLimit=document.getElementById("Gas_Limit").innerText;
    console.log(level);
-  if ((parseInt(level)>=gasLimit)||(parseInt(temp)>=35)||(parseInt(humidity)<=45)) {
+  if ((parseInt(level)>=gasLimit)||(parseInt(temp)>=32)||(parseInt(humidity)<=45)) {
    
    image.src = "Enel_Face.jpeg";
    } else {
@@ -89,7 +113,69 @@ function changeImage() {
  setInterval(changeImage, 10);
 
 </script>
+<h2><center>Technical Explanation</center></h2>
+<div class="card"><div class="container"><h3>Main Design Goals</h3><p>
+  The main design goal of our gauntlet was functionality over form. 
+  Our gauntlet  may no be the most intricate or complex design, but what it does it does perfectly. 
+  We maximized the amount of space to house electrical components while also making sure that no wires or breadboards are sticking out. 
+  We made sure that all our electrical components worked as intended instead of overreaching and not being able to complete on time. 
+</p></div></div>
+<br>
+<br>
+<div class="card"><div class="container"><h3>Chosen Sensors</h3><p>
+  We chose to use the gas sensor and the temperature/humidity sensor(possibly ultrasonic sensor). 
+  The gas sensor allows us to detect gas leaks by measuring the change in the gas readings and it also helps to detect a 
+  fire through the same process. The temperature/humidity sensor allows us to differentiate between a fire and a gas leak.
+   In both instances the gas sensor will detect in an increase in the gas level, but a fire would be hotter and more dry than a gas leak.
+   ( The ultrasonic sensor allows us to detect objects that could potentially be in our path in dark areas or detect any 
+   survivors that may be in need of help.)
+</p></div></div>
+<br>
+ <div class="card"><div class="container"><h3>Code Explanation</h3>
+  <p>
+    Our code works to mesh all our different sensors together while also collecting and recording data to be sent to our website. 
+    Firstly we connect to the WiFi and set up or publisher to send data to our website later.
+     A ring LED, buzzer, and the temperature/humidity sensor are also turned on in the set-up.
+     Within the loop we collect data from the different sensors and store them. 
+     Depending on the data values different indicators are turned off are on to indicate if the area is safe to the E-hero.
+      We implemented this using if-else statements because it was the easiest way to to go through each of the various conditions. 
+      All our data is stored in separate variables to be sent ot our OLED and to our website later using the publisher. 
+      We also have different statements to send to the website and OLED depending on which detected values are true or false. 
+
+  </p></div></div>
+ <br>
+ <div class="card"><div class="container"><h3>Problems and Solutions</h3>
+  <p>
+    The biggest problem that occurred was probably the implementation of our website and being able to host on a server.
+     We couldn’t really understand how we were supposed to use the provided communications code.  
+     The first thing we did was try to implement a local-hosted website by using some of the code 
+     covered in a one of the specialized trainings for HAcK, but we realized that this didn’t solve our problem because we 
+     realized so that it didn’t actually use the provided code and was instead the Arduino creating this website and editing 
+     the data itself instead of being dynamically updated. Next we went to Austin and he was able to explain to us that we needed 
+     to create a folder with an html file for our website and the communication.js file then upload the website using a local host server.
+     Finally, we had our locally hosted website and we could send data collected from our ESP 32 to it. What caused our problem was that
+      we didn’t really read the instructions that came with our provided code and attempted to solve our problem without truly 
+      understanding what the problem was. Another problem we had was with our ring LED. The ring LED has a different RGB order 
+      depending on which number LED it is, so if we attempted to turn it on with a single color then the ring would have a bunch of 
+      different colors instead of one. We solved this problem by looking up specifications for the LED and found a function that was 
+      able to make the entire ring light up the same color. When we implemented the OLED and the temperature/humidity sensor we also 
+      ran into problems because both used SCL and SDA. We solved this problem by using the OneWire communication protocol where slaves 
+      branch off a strip connected to the SCL and SDA from the ESP 32.
+
+  </p></div></div>
+ <br>
+ <div class="card"><div class="container"><h3>CAD Design and Explanation</h3>
+  <p></p></div></div>
+  <div class="card"><div class="container"><h3>Conclusion</h3>
+    <p>The experience we have gained by working on this project has made all three of us better engineers.
+       We have learned to be able to do things that some of us might have no experience in before this summer. 
+       We learned how to work together as a team by dividing work between individuals who are best suited for the role and
+        also coming together to combine our individual work together.
+       This project has provided us with the perfect opportunity to hone and further expand our technical skills.
+        </p></div></div>
+ <br>
  
+
   <!--
   This script places a badge on your repl's full-browser view back to your repl's cover
   page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,
