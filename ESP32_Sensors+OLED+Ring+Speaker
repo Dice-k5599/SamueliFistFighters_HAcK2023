@@ -7,6 +7,8 @@
 
 
 
+
+
 //Declaration of OLED
 Adafruit_SSD1306 oled(128,64,&Wire,-1);
 //Wifi SSID and Password
@@ -15,11 +17,11 @@ const char *password="K33pi7$@f3%";
 //Pin on esp32 connected to gas analog pin
 const int gasPin=A3;
 //Threshold number for dangerous gas readings
-const int gasLimit=925;
+int gasLimit;
 //Temperature limit (Celsius)
-const int tempLimit=35;
+const int tempLimit=32;
 //Humidity limit
-const int humidityLimit=60;
+const int humidityLimit=45;
 //Pins providing current for LEDS
 const int RED_LED=16;
 const int GREEN_LED=17;
@@ -92,6 +94,8 @@ void setup() {
      }
      //intialize temperature/humidity sensor
   AM2320.wakeUp();
+  gasLimit=analogRead(gasPin)+600;
+  Serial.println(gasLimit);
   delay(2000);
 
   Serial.println("Type,\tStatus,\tHumidity (%),\tTemperature (C)");
@@ -123,7 +127,9 @@ void loop() {
   // READ DATA (Temperature/Humidity)
   int status = AM2320.read();
   float temperature = AM2320.getTemperature();
+  temperature=round(temperature);
   float humidity = AM2320.getHumidity();
+  humidity=round(humidity);
   
   switch (status)
   {
@@ -159,7 +165,7 @@ void loop() {
   else{
     tempSafe=true;
   }
-  if(humidity>=humidityLimit){
+  if(humidity<=humidityLimit){
     humiditySafe=false;
   }
   else{
@@ -169,16 +175,18 @@ void loop() {
   int buttonState=digitalRead(BUTTON_PIN);
   if (buttonState == LOW) {
     if(!prevState){
-       for(uint8_t i=0;i<LED_COUNT;i++){
-     ring.setPixelColor(i,ring.Color(255,255,100));}
+//       for(uint8_t i=0;i<LED_COUNT;i++){
+//     ring.setPixelColor(i,ring.Color(255,255,100));}
+    ring.fill(4294967295, 0, 0);
     
     ring.show();
     prevState=true;
     }
     else{
-      for(int i=0;i< LED_COUNT;i++){
-      ring.setPixelColor(i,ring.Color(0,0,0));
-      }
+//      for(int i=0;i< LED_COUNT;i++){
+//      ring.setPixelColor(i,ring.Color(0,0,0));
+//      }
+      ring.fill();
       ring.show();
       prevState=false;
      }
@@ -251,6 +259,7 @@ void loop() {
     oled.display();
   }
   publisher.store("Temperature",temperature);
+  publisher.store("Gas_Limit",gasLimit);
   publisher.store("Humidity",humidity);
   publisher.send();
   
