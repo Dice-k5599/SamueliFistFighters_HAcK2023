@@ -116,56 +116,79 @@ function changeImage() {
 <h2><center>Technical Explanation</center></h2>
 <div class="card"><div class="container"><h3>Main Design Goals</h3><p>
   The main design goal of our gauntlet was functionality over form. 
-  Our gauntlet  may no be the most intricate or complex design, but what it does it does perfectly. 
-  We maximized the amount of space to house electrical components while also making sure that no wires or breadboards are sticking out. 
-  We made sure that all our electrical components worked as intended instead of overreaching and not being able to complete on time. 
+  Our gauntlet may not be the most intricate or complex design, but what it does it does perfectly. 
+  We maximized the amount of space to house electrical components while also making sure that no wires or breadboards are sticking out.
+   We made sure that all our electrical components worked as intended instead of overreaching and not being able to complete them on time. 
 </p></div></div>
 <br>
 <br>
 <div class="card"><div class="container"><h3>Chosen Sensors</h3><p>
-  We chose to use the gas sensor and the temperature/humidity sensor(possibly ultrasonic sensor). 
-  The gas sensor allows us to detect gas leaks by measuring the change in the gas readings and it also helps to detect a 
-  fire through the same process. The temperature/humidity sensor allows us to differentiate between a fire and a gas leak.
-   In both instances the gas sensor will detect in an increase in the gas level, but a fire would be hotter and more dry than a gas leak.
-   ( The ultrasonic sensor allows us to detect objects that could potentially be in our path in dark areas or detect any 
-   survivors that may be in need of help.)
+  We chose to use the gas sensor, the temperature/humidity sensor, and the ultrasonic sensor. 
+  The gas sensor allows us to detect gas leaks by measuring the change in the gas readings and it also helps to detect a fire through 
+  the same process. The temperature/humidity sensor allows us to differentiate between a fire and a gas leak. 
+  In both instances, the gas sensor will detect in an increase in the gas level, but a fire would be hotter and more dry than a gas leak. 
+  The ultrasonic sensor allows us to detect objects that could potentially be in our path in dark areas or detect any survivors that
+   may be in need of help. The combination of the three sensors will allow us to be able to navigate the designated scenarios.
 </p></div></div>
 <br>
  <div class="card"><div class="container"><h3>Code Explanation</h3>
   <p>
     Our code works to mesh all our different sensors together while also collecting and recording data to be sent to our website. 
-    Firstly we connect to the WiFi and set up or publisher to send data to our website later.
-     A ring LED, buzzer, and the temperature/humidity sensor are also turned on in the set-up.
-     Within the loop we collect data from the different sensors and store them. 
-     Depending on the data values different indicators are turned off are on to indicate if the area is safe to the E-hero.
-      We implemented this using if-else statements because it was the easiest way to to go through each of the various conditions. 
-      All our data is stored in separate variables to be sent ot our OLED and to our website later using the publisher. 
-      We also have different statements to send to the website and OLED depending on which detected values are true or false. 
+    Firstly we connect to the WiFi and set up our publisher to send data to our website later. 
+    A ring LED, buzzer, and temperature/humidity sensor are also turned on in the set-up.
+     Within the loop, we collect data from the different sensors and store them. Depending on the data values different indicators are 
+     turned off are on to indicate if the area is safe for the E-hero. We implemented this using if-else statements because it was 
+     the easiest way to go through each of the various conditions. All our data is stored in separate variables to be sent to our OLED 
+     and to our website later using the publisher. We also have different statements to send to the website and OLED depending on which 
+     detected values are true or false. Once all the data has been collected it’s sent to the website to be displayed. 
+     The HTML file linked to the website has various classes defined to help stylize our website. Each of the data values from the sensors
+      is posted in its own space to be displayed with an image displayed above it related to what type of data it is. 
 
   </p></div></div>
  <br>
  <div class="card"><div class="container"><h3>Problems and Solutions</h3>
   <p>
-    The biggest problem that occurred was probably the implementation of our website and being able to host on a server.
-     We couldn’t really understand how we were supposed to use the provided communications code.  
-     The first thing we did was try to implement a local-hosted website by using some of the code 
-     covered in a one of the specialized trainings for HAcK, but we realized that this didn’t solve our problem because we 
-     realized so that it didn’t actually use the provided code and was instead the Arduino creating this website and editing 
-     the data itself instead of being dynamically updated. Next we went to Austin and he was able to explain to us that we needed 
-     to create a folder with an html file for our website and the communication.js file then upload the website using a local host server.
-     Finally, we had our locally hosted website and we could send data collected from our ESP 32 to it. What caused our problem was that
-      we didn’t really read the instructions that came with our provided code and attempted to solve our problem without truly 
-      understanding what the problem was. Another problem we had was with our ring LED. The ring LED has a different RGB order 
-      depending on which number LED it is, so if we attempted to turn it on with a single color then the ring would have a bunch of 
-      different colors instead of one. We solved this problem by looking up specifications for the LED and found a function that was 
-      able to make the entire ring light up the same color. When we implemented the OLED and the temperature/humidity sensor we also 
-      ran into problems because both used SCL and SDA. We solved this problem by using the OneWire communication protocol where slaves 
-      branch off a strip connected to the SCL and SDA from the ESP 32.
+  The biggest problem that occurred was probably the implementation of our website and being able to host it on a server. 
+  We couldn’t really understand how we were supposed to use the provided communications code.  
+  The first thing we did was try to implement a local-hosted website by using some of the code covered in one of the specialized training
+   for HAcK. Still, we realized that this didn’t solve our problem because we realized that it didn’t actually use the provided code 
+   and was instead the Arduino creating this website and editing the data itself instead of being dynamically updated.
+    Next, we went to Austin and he was able to explain to us that we needed to create a folder with an html file for our website and 
+    the communication.js file then upload the website using a local host server. Finally, we had our locally hosted website and we 
+    could send data collected from our ESP 32 to it. What caused our problem was that we didn’t really read the instructions that came 
+    with our provided code and attempted to solve our problem without truly understanding what the problem was. Another problem we had 
+    was with our ring LED. The ring LED has a different RGB order depending on which number LED it is, so if we attempted to turn it on 
+    with a single color then the ring would have a bunch of different colors instead of one. We solved this problem by looking up 
+    specifications for the LED and found a function that was able to make the entire ring light up the same color. When we implemented
+     the OLED and the temperature/humidity sensor we also ran into problems because both used SCL and SDA. 
+     We solved this problem by using the OneWire communication protocol where slaves branch off a strip connected to the 
+     SCL and SDA from the ESP 32. In incorporating the hypersonic sensor, despite using the correct example code and double-checking 
+     circuit orientation, the hypersonic sensor continued to only read 0 distance. We had overlooked the possibility of hardware failure 
+     in both the sensor and jumper wires. In future circuit implementations, we adopted additional testing of each piece of hardware 
+     through isolation and individually testing each. 
 
   </p></div></div>
  <br>
  <div class="card"><div class="container"><h3>CAD Design and Explanation</h3>
-  <p></p></div></div>
+  <p>
+    We wanted to keep our CAD design as simple as possible while working entirely on a laser cutter. While 3D printing allows complicated and more creative designs, its process takes too long to iterate through enough versions of our gauntlet design. We decided from the beginning that making our part using only laser cutting will not only save us time but also allow us to go through a number of iterations. 
+Our gauntlet is a box-like shape, with a handle that could be held. The box has two compartments: one that will be for our hand and arm, and one for the circuits. The arm part’s handle is sandwiched by two pieces so that when held, the entire gauntlet sits nicely on top of the person’s arm. There are three major benefits of this design (aside from the being entirely made on laser cutting): adjustments can be easily made, the circuit is hidden from the outside, and its simplicity. Since the gauntlet is a box, composed of wooden plates, assembly takes less than 5 minutes, so going through different iterations a is hassle-free process. The circuit is all under the top lid surrounded by a wall isolated from the outside, so there is no worry of users accidentally detaching or damaging the wires when in use. 
+
+I went through 3 major iterations when making the box gauntlet: an initial prototype composed of rectangle plates, a puzzle plate design with cutouts for more contact points, and finally the final design with all required holes. 
+
+<h3>First Version: </h3>
+The initial prototype was as simple as it gets. I cut out rectangular plates and glued them together to make a box. This allowed us to have our first prototype done on the first day, and figure out the spacing constraints for the circuits. The shape was fairly functional, so we decided to keep the overall shape design. This version of the iteration had two major problems: the assembly was very fragile and assembly took a long time. Simply cutting out rectangles did not provide enough contact points for each part to stick together. There were 9 parts that had to be glued, which parts took 30 minutes to assemble. I needed to have more contact points while keeping the parts count low. 
+
+One minor problem we noticed was when holding the gauntlet, our hands interfered with the floor of the circuit housing. All around the design had to be updated while keeping the shape the same.  
+<h3>Second version: </h3>
+To address the problems we encountered in the first iteration, we decided to make our plates with a puzzle-like design with male and female parts. This solved both problems, by increasing contact points between parts while also being able to decrease the parts count to only 5. Having sockets also meant that the parts could be held together without gluing parts, so assembly and disassembly were simple. To address the problem of the hand interfering with one of the plates, we increased the height of the hand+arm compartment by 1cm. 
+
+More detailed elements still had to be added. To keep wires from being visible from the outside, we had to cut out various sizes and shapes of holes for sensors and UI parts, which we added to the final design
+
+<h3>Third (and final) version: </h3>
+The holes to store sensors and other parts required precise sizing and placement. Screws had to fit tightly so parts won’t be loose. Holes had to be minimal in size so that they won’t be visible from the outside. The thickness of the wood plates had to be taken into consideration. For better accuracy, I downloaded CAD files for each part so I know where to cut holes. I went through an average of 3.2 iterations for each part and tested out each one by laser cutting. The laser cutter sometimes outputed parts that did not align with my part’s dimension, which happened to be the most challenging step when designing holes that perfectly fit parts. 
+
+  </p></div></div>
   <div class="card"><div class="container"><h3>Conclusion</h3>
     <p>The experience we have gained by working on this project has made all three of us better engineers.
        We have learned to be able to do things that some of us might have no experience in before this summer. 
@@ -174,13 +197,7 @@ function changeImage() {
        This project has provided us with the perfect opportunity to hone and further expand our technical skills.
         </p></div></div>
  <br>
- 
 
-  <!--
-  This script places a badge on your repl's full-browser view back to your repl's cover
-  page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,
-  teal, blue, blurple, magenta, pink!
-  -->
   <script src="192.168.50.200" theme="dark" position="bottom-right"></script>
 </body>
 
