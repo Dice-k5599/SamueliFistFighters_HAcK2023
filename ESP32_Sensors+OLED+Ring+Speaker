@@ -7,7 +7,7 @@
 
 
 
-//Samueli Fist Fighters
+
 
 //Declaration of OLED
 Adafruit_SSD1306 oled(128,64,&Wire,-1);
@@ -37,11 +37,10 @@ bool prevState=false;
 const int LED_COUNT=12;
 //Pin connected to Neopixel IN Port
 const int LED_PIN=15;
+//Pins for ultrasonic sensor
+const int trigPin=27;
+const int echoPin=33;
 //Booleans for gas, temperature and humidity safety
-// Hypersonic sensor trigger pin
-const int trigPin = 27;
-// Hypersonic sensor echo pin
-const int echoPin = 33;
 bool gasSafe=false;
 bool tempSafe=false;
 bool humiditySafe=false;
@@ -62,8 +61,8 @@ void setup() {
   pinMode(gasPin, INPUT);
   pinMode(speakerPin, OUTPUT);
   pinMode(BUTTON_PIN,INPUT_PULLUP);
-  pinMode(trigPin, OUTPUT); 
-  pinMode(echoPin, INPUT); 
+  pinMode(trigPin,OUTPUT);
+  pinMode(echoPin,INPUT);
   pinMode(13,INPUT_PULLUP);
   
   while(!Serial)continue;
@@ -119,8 +118,6 @@ void play(int note, int dur)
 void loop() {
   // Read gas level detected by gas sensor
   int gasLevel=analogRead(gasPin);
-  
-  Serial.println(gasLevel);
   //Clear oled display for new data
   oled.clearDisplay();
   oled.setTextSize(1);
@@ -129,24 +126,21 @@ void loop() {
   //Display gas data to OLED
   oled.print("Gas Level ");
   oled.println(gasLevel);
-
-  // READ DATA (Distance)
-  // Clears the trigPin
-  digitalWrite(trigPin, LOW);
+  //Read Data from ultrasonic sensor
+  digitalWrite(trigPin,LOW);
   delayMicroseconds(2);
-  // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(trigPin,HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  // Reads the echoPin, returns the sound wave travel time in microseconds
-  long duration = pulseIn(echoPin, HIGH);
-  // Calculating the distance
-  double distance = (0.034 * duration) / 2;
-  
-  // DISPLAY DATA (Distance) on OLEDl
+  digitalWrite(trigPin,LOW);
+  long duration=pulseIn(echoPin,HIGH);
+  //Formula to convert time it takes for the waves to travel to distance
+  double distance=(0.034*duration)/2;
+  //Print Data from ultrasonic sensor
   oled.print("Distance: ");
   oled.print(distance);
   oled.println(" cm");
+  Serial.print("Distance: ");
+  Serial.println(distance);
 
   // READ DATA (Temperature/Humidity)
   int status = AM2320.read();
@@ -171,12 +165,13 @@ void loop() {
   Serial.println(" C");
   Serial.print("Humidity: ");
   Serial.println(humidity);
-
+  
   oled.print("Temperature: ");
   oled.println(temperature);
   oled.print("Humidity: ");
   oled.println(humidity);
-  //Check if gas level, temperature and humidity are safe
+  //Check if gas level, temperature and humidity are safe or not
+  //In case it isn't corresponding boolean value is changed
   if(gasLevel>=gasLimit){
     gasSafe=false;
   }
@@ -199,31 +194,34 @@ void loop() {
   int buttonState=digitalRead(BUTTON_PIN);
   if (buttonState == LOW) {
     if(!prevState){
-//       for(uint8_t i=0;i<LED_COUNT;i++){
-//     ring.setPixelColor(i,ring.Color(255,255,100));}
     ring.fill(4294967295, 0, 0);
     
     ring.show();
     prevState=true;
     }
     else{
-//      for(int i=0;i< LED_COUNT;i++){
-//      ring.setPixelColor(i,ring.Color(0,0,0));
-//      }
       ring.fill();
       ring.show();
       prevState=false;
-     }
-     
+     } 
   }
-
-  
+  //Store data to be sent by publisher
   publisher.store("Gas_Level",gasLevel);
+  //If else statements to determine what message should be stored
+  //to be sent back to the website
   if(gasSafe&&tempSafe&&humiditySafe){
     digitalWrite(RED_LED, LOW);
     digitalWrite(GREEN_LED, HIGH);
     publisher.store("Danger_Level", "Area Safe");
     oled.println("Area Safe");
+    oled.display();
+  }
+  else if(!gasSafe&&!tempSafe&&!humiditySafe){
+    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(RED_LED, HIGH);
+    play(3000, 3);
+    publisher.store("Danger_Level", "Hazardous Gas Temperature and Humidity");
+    oled.println("Hazardous Gas Temperature and Humidity");
     oled.display();
   }
   else if(!gasSafe&&!tempSafe){
@@ -274,17 +272,19 @@ void loop() {
     oled.println("Hazardous Humidity");
     oled.display();
   }
-  else{
-    digitalWrite(GREEN_LED, LOW);
-    digitalWrite(RED_LED, HIGH);
-    play(3000, 3);
-    publisher.store("Danger_Level", "Hazardous Gas Temperature and Humidity");
-    oled.println("Hazardous Gas Temperature and Humidity");
-    oled.display();
-  }
+//  else{
+//    digitalWrite(GREEN_LED, LOW);
+//    digitalWrite(RED_LED, HIGH);
+//    play(3000, 3);
+//    publisher.store("Danger_Level", "Hazardous Gas Temperature and Humidity");
+//    oled.println("Hazardous Gas Temperature and Humidity");
+//    oled.display();
+//  }
   publisher.store("Temperature",temperature);
   publisher.store("Gas_Limit",gasLimit);
   publisher.store("Humidity",humidity);
+  publisher.store("Distance",distance);
+  //Send all stored data to website
   publisher.send();
   
   delay(100);
