@@ -28,6 +28,9 @@
         font-size: 32px;
         color:black;
         font-family:'Times New Roman';
+        margin-top:-45px;
+        margin-right:-45px;
+        margin-left:-45px;
       }
       .centeredCard{
         box-shadow:0 4px 8px 0 rgba(0,0,0,0.2);
@@ -48,7 +51,7 @@
   <!--change team neam here and in publisher Declaration on arduino-->
   <script> team_name="Samueli Fist Fighters"</script>
   <script type="module" src="communication.js"></script>
-  <div class="header"><h1><center>Samueli Fist Fighters</center></h1><h2><center>Sensor Values</center></h2></div>
+  <div class="header"><h1><center>Samueli Fist Fighters</center></h1></div><h2><center>Sensor Values</center></h2>
 
   <div class="card">
     <img src="Clown_3_634x450.jpeg"alt="Clown" style="width:100%">
